@@ -12,12 +12,16 @@ class App:
         self.cursor = self.connection.cursor()
 
     def __createTable(self):
+        response_opt = "CREATE TABLE IF NOT EXISTS employees(name, bithsday, sex, age)"
         self.cursor.execute("CREATE TABLE IF NOT EXISTS employees(name, bithsday, sex)")
 
     def __makeRecord(self):
-        record = sys.argv[2::]
-        rec = Record(record)
-        rec.push(self.cursor)
+        try:
+            record = sys.argv[2::]
+            rec = Record(record)
+            rec.push(self.cursor)
+        except:
+            print("Record is incorrect")
 
     def __dropTable(self):
         self.cursor.execute("DROP TABLE employees")
@@ -46,12 +50,16 @@ class App:
         return records
    
     def __showRecords(self):
-        return self.cursor.execute("""
+        try:
+            return self.cursor.execute("""
                        SELECT DISTINCT name, bithsday, sex ,
                        cast (date('now','start of year') as integer) - cast (date(bithsday,'start of year') as integer) + case when strftime('%m-%d',date('now')) < strftime('%m-%d',bithsday) then -1 else 0 end
                        FROM employees
                        ORDER BY name ASC
                        """).fetchall()
+        except:
+            return []
+
 
     def __showSelectedRecords(self):
         return self.cursor.execute("""
@@ -86,3 +94,5 @@ class App:
         elif num_operation==0:
             self.__dropTable()
             self.connection.commit()
+        else:
+            print("Incorrect imput. Please try again.")
